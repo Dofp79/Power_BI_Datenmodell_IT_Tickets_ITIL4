@@ -1,4 +1,4 @@
-##Status-Log (Empfehlung)
+#Status-Log (Empfehlung)
 
 Tabellen
 
@@ -11,7 +11,7 @@ Ziel
 Erstes Datum, an dem der Status „Gelöst/Geschlossen“ erreicht wurde - Geschlossen am
 
 Merge zurück in die Faktentabelle
-
+````
 ##1) Status-Text normalisieren (StatusLog)
 ```m
 let
@@ -60,7 +60,7 @@ in
 
 Hinweis: Das ist nur eine Näherung (nimmt an, dass die letzte Änderung das Schließdatum ist).
 
-##„Erledigt-Flag“**
+#„Erledigt-Flag“**
 
 Hast du ein Bool/Flag Erledigt und ein Feld Erledigt am? Dann einfach kopieren:
 ```m
