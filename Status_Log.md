@@ -21,7 +21,7 @@ let
   Map    = Table.ReplaceValue(Trim, "IN PROGRESS", "IN BEARBEITUNG", Replacer.ReplaceText, {"Status"})
 in
   Map
-
+```
 3) „Geschlossen am“ aus dem Log ermitteln
 ```m
 let
@@ -31,6 +31,7 @@ let
 in
   MinClosed
 ```
+
 4) Mit Tickets mergen - Fact
 ```m
 let
