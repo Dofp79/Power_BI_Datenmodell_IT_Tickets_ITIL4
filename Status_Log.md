@@ -1,18 +1,20 @@
-#Status-Log (Empfehlung)
+# Power BI – "Geschlossen am" simulieren
 
-Tabellen
+In vielen ITSM-Datenquellen fehlt ein explizites Feld **„Geschlossen am“**. Mit Power Query (M) und DAX kannst du dieses Feld ableiten. Je nach Datenlage gibt es drei Varianten.
 
-Tickets (aktuelle Stammdaten, enthält TicketID, Erstellt am, …)
+---
 
-StatusLog (Verlaufsdaten: TicketID, Status, StatusDatum)
+## Variante A – Mit Status-Log (Empfohlen)
 
-Ziel
+### Tabellen
+- **Tickets**: Stammdaten (enthält `TicketID`, `Erstellt am`, …)
+- **StatusLog**: Verlaufsdaten (`TicketID`, `Status`, `StatusDatum`)
 
-Erstes Datum, an dem der Status „Gelöst/Geschlossen“ erreicht wurde - Geschlossen am
+### Ziel
+- Erstes Datum, an dem ein Ticket den Status **„Gelöst“** oder **„Geschlossen“** erreicht → `Geschlossen am`
+- Merge zurück in die Faktentabelle
 
-Merge zurück in die Faktentabelle
-````
-##1) Status-Text normalisieren (StatusLog)
+### 1) Status-Text normalisieren
 ```m
 let
   Source = StatusLog,
@@ -22,7 +24,8 @@ let
 in
   Map
 ```
-##2) „Geschlossen am“ aus dem Log ermitteln
+
+### 2) „Geschlossen am“ ermitteln
 ```m
 let
   Clean       = #"StatusLog Normalisiert",
@@ -32,7 +35,7 @@ in
   MinClosed
 ```
 
-##3) Mit Tickets mergen - Fact
+### 3) Mit Tickets mergen
 ```m
 let
   Tix        = Tickets,
@@ -42,13 +45,15 @@ in
   Expanded
 ```
 
-Ergebnis: fact_Incidents enthält nun Geschlossen am (nullable).
+> Ergebnis: `fact_Incidents` enthält nun ein Feld **„Geschlossen am“** (nullable).
 
-**Kein Log, nur Momentaufnahme**
+---
 
-Wenn es z. B. Letzte Änderung am gibt und Status aktuell „Geschlossen“ ist:
+## Variante B – Ohne Log (Momentaufnahme)
+
+Falls es nur ein Feld **„Letzte Änderung am“** gibt und der aktuelle Status **„Geschlossen“** ist:
+
 ```m
-
 let
   Tix       = Tickets,
   Types     = Table.TransformColumnTypes(Tix,{{"Erstellt am", type datetime},{"Letzte Änderung am", type datetime},{"Status", type text}}),
@@ -58,18 +63,28 @@ in
   AddClosed
 ```
 
-Hinweis: Das ist nur eine Näherung (nimmt an, dass die letzte Änderung das Schließdatum ist).
+> ⚠️ Hinweis: Dies ist nur eine **Näherung** (setzt voraus, dass die letzte Änderung = Schließdatum ist).
 
-#„Erledigt-Flag“**
+---
 
-Hast du ein Bool/Flag Erledigt und ein Feld Erledigt am? Dann einfach kopieren:
+## Variante C – Mit Erledigt-Flag
+
+Falls es ein Bool-Feld `Erledigt` und ein Datum `Erledigt am` gibt:
+
 ```m
 let
   AddClosed = Table.AddColumn(Tickets, "Geschlossen am", each if [Erledigt] = true then [Erledigt am] else null, type datetime)
 in
   AddClosed
+```
 
-DAX (mit neuem Feld nutzbar)
+---
+
+## DAX mit dem neuen Feld
+
+Sobald `Geschlossen am` existiert, kannst du es in Measures nutzen:
+
+```DAX
 Bearbeitungszeit (Tage) :=
 AVERAGEX (
   'fact_Incidents',
@@ -79,12 +94,13 @@ AVERAGEX (
 Tickets nach Schließdatum :=
 CALCULATE ( [Anzahl_Tickets], USERELATIONSHIP('fact_Incidents'[Geschlossen am], 'dim_Datum'[Date]) )
 ```
-##Praxis-Tipps
 
-Lege Geschlossen am nur für Tickets mit Status „Gelöst/Geschlossen“; sonst null.
+---
 
-Nutze in Visuals:
-– Eröffnungs-Trends über Erstellt am (aktive Beziehung)
-– Abschluss-Trends über Geschlossen am via USERELATIONSHIP.
+## Praxis-Tipps
 
-Dokumentiere im Modell: „Geschlossen am (simuliert aus Status-Log / letzter Änderung)“.
+- Lege `Geschlossen am` **nur** für Tickets mit Status „Gelöst/Geschlossen“; sonst `null`.
+- Nutze in Visuals:
+  - **Eröffnungs-Trends** über `Erstellt am` (aktive Beziehung)
+  - **Abschluss-Trends** über `Geschlossen am` via `USERELATIONSHIP`
+- Dokumentiere im Modell: *„Geschlossen am (simuliert aus Status-Log / letzter Änderung)“*
