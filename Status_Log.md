@@ -1,4 +1,4 @@
-###Status-Log (Empfehlung)
+##Status-Log (Empfehlung)
 
 Tabellen
 
@@ -60,7 +60,7 @@ in
 
 Hinweis: Das ist nur eine Näherung (nimmt an, dass die letzte Änderung das Schließdatum ist).
 
-### „Erledigt-Flag“**
+##„Erledigt-Flag“**
 
 Hast du ein Bool/Flag Erledigt und ein Feld Erledigt am? Dann einfach kopieren:
 ```m
