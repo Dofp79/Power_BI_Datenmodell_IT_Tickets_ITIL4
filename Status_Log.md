@@ -1,4 +1,4 @@
-Status-Log (Empfehlung)
+###Status-Log (Empfehlung)
 
 Tabellen
 
@@ -12,7 +12,7 @@ Erstes Datum, an dem der Status „Gelöst/Geschlossen“ erreicht wurde - Gesch
 
 Merge zurück in die Faktentabelle
 
-1) Status-Text normalisieren (StatusLog)
+##1) Status-Text normalisieren (StatusLog)
 ```m
 let
   Source = StatusLog,
@@ -22,7 +22,7 @@ let
 in
   Map
 ```
-3) „Geschlossen am“ aus dem Log ermitteln
+##2) „Geschlossen am“ aus dem Log ermitteln
 ```m
 let
   Clean       = #"StatusLog Normalisiert",
@@ -32,7 +32,7 @@ in
   MinClosed
 ```
 
-4) Mit Tickets mergen - Fact
+##3) Mit Tickets mergen - Fact
 ```m
 let
   Tix        = Tickets,
@@ -44,7 +44,7 @@ in
 
 Ergebnis: fact_Incidents enthält nun Geschlossen am (nullable).
 
-Variante B – Kein Log, nur Momentaufnahme
+**Kein Log, nur Momentaufnahme**
 
 Wenn es z. B. Letzte Änderung am gibt und Status aktuell „Geschlossen“ ist:
 ```m
@@ -60,7 +60,7 @@ in
 
 Hinweis: Das ist nur eine Näherung (nimmt an, dass die letzte Änderung das Schließdatum ist).
 
-Variante C – „Erledigt-Flag“
+### „Erledigt-Flag“**
 
 Hast du ein Bool/Flag Erledigt und ein Feld Erledigt am? Dann einfach kopieren:
 ```m
@@ -79,7 +79,7 @@ AVERAGEX (
 Tickets nach Schließdatum :=
 CALCULATE ( [Anzahl_Tickets], USERELATIONSHIP('fact_Incidents'[Geschlossen am], 'dim_Datum'[Date]) )
 ```
-Praxis-Tipps
+##Praxis-Tipps
 
 Lege Geschlossen am nur für Tickets mit Status „Gelöst/Geschlossen“; sonst null.
 
