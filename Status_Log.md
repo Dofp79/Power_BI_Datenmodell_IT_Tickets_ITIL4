@@ -13,6 +13,7 @@ Erstes Datum, an dem der Status „Gelöst/Geschlossen“ erreicht wurde - Gesch
 Merge zurück in die Faktentabelle
 
 1) Status-Text normalisieren (StatusLog)
+```m
 let
   Source = StatusLog,
   Types  = Table.TransformColumnTypes(Source,{{"TicketID", type text},{"Status", type text},{"StatusDatum", type datetime}}),
@@ -21,7 +22,7 @@ let
 in
   Map
 
-2) „Geschlossen am“ aus dem Log ermitteln
+3) „Geschlossen am“ aus dem Log ermitteln
 let
   Clean       = #"StatusLog Normalisiert",
   ClosedSet   = Table.SelectRows(Clean, each [Status] = "GELÖST" or [Status] = "GESCHLOSSEN"),
@@ -29,20 +30,21 @@ let
 in
   MinClosed
 
-3) Mit Tickets mergen → Fact
+4) Mit Tickets mergen → Fact
 let
   Tix        = Tickets,
   Merge      = Table.NestedJoin(Tix, {"TicketID"}, MinClosed, {"TicketID"}, "Closed", JoinKind.LeftOuter),
   Expanded   = Table.ExpandTableColumn(Merge, "Closed", {"Geschlossen am"}, {"Geschlossen am"})
 in
   Expanded
-
+```
 
 Ergebnis: fact_Incidents enthält nun Geschlossen am (nullable).
 
 Variante B – Kein Log, nur Momentaufnahme
 
 Wenn es z. B. Letzte Änderung am gibt und Status aktuell „Geschlossen“ ist:
+```m
 
 let
   Tix       = Tickets,
@@ -51,14 +53,14 @@ let
   AddClosed = Table.AddColumn(Norm, "Geschlossen am", each if [Status] = "GESCHLOSSEN" or [Status] = "GELÖST" then [Letzte Änderung am] else null, type datetime)
 in
   AddClosed
-
+```
 
 Hinweis: Das ist nur eine Näherung (nimmt an, dass die letzte Änderung das Schließdatum ist).
 
 Variante C – „Erledigt-Flag“
 
 Hast du ein Bool/Flag Erledigt und ein Feld Erledigt am? Dann einfach kopieren:
-
+```m
 let
   AddClosed = Table.AddColumn(Tickets, "Geschlossen am", each if [Erledigt] = true then [Erledigt am] else null, type datetime)
 in
@@ -73,7 +75,7 @@ AVERAGEX (
 
 Tickets nach Schließdatum :=
 CALCULATE ( [Anzahl_Tickets], USERELATIONSHIP('fact_Incidents'[Geschlossen am], 'dim_Datum'[Date]) )
-
+```
 Praxis-Tipps
 
 Lege Geschlossen am nur für Tickets mit Status „Gelöst/Geschlossen“; sonst null.
