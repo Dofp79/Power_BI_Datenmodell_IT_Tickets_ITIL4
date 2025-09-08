@@ -8,7 +8,7 @@ StatusLog (Verlaufsdaten: TicketID, Status, StatusDatum)
 
 Ziel
 
-Erstes Datum, an dem der Status „Gelöst/Geschlossen“ erreicht wurde → Geschlossen am
+Erstes Datum, an dem der Status „Gelöst/Geschlossen“ erreicht wurde - Geschlossen am
 
 Merge zurück in die Faktentabelle
 
