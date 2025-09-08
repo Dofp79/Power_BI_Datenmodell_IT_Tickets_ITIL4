@@ -23,14 +23,16 @@ in
   Map
 
 3) „Geschlossen am“ aus dem Log ermitteln
+```m
 let
   Clean       = #"StatusLog Normalisiert",
   ClosedSet   = Table.SelectRows(Clean, each [Status] = "GELÖST" or [Status] = "GESCHLOSSEN"),
   MinClosed   = Table.Group(ClosedSet, {"TicketID"}, {{"Geschlossen am", each List.Min([StatusDatum]), type datetime}})
 in
   MinClosed
-
-4) Mit Tickets mergen → Fact
+```
+4) Mit Tickets mergen - Fact
+```m
 let
   Tix        = Tickets,
   Merge      = Table.NestedJoin(Tix, {"TicketID"}, MinClosed, {"TicketID"}, "Closed", JoinKind.LeftOuter),
